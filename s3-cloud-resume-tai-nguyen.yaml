@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  StaticWebsiteBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'cloud-resume-tai-nguyen'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+  StaticWebsiteBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy
+        Version: '2012-10-17'
+        Statement:
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${StaticWebsiteBucket}/*'
+      Bucket: !Ref StaticWebsiteBucket
+  StaticWebsiteCloudFrontDistribution:
+    Type: 'AWS::CloudFront::Distribution'
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        Origins:
+          - DomainName: !GetAtt StaticWebsiteBucket.RegionalDomainName
+            Id: StaticWebsiteS3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          MinTTL: 3600
+          MaxTTL: 86400
+          DefaultTTL: 3600
+          TargetOriginId: StaticWebsiteS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+  VisitorCountTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ResumeVisitorCount
+      BillingMode: PAY_PER_REQUEST  # On-demand pricing, no need to provision capacity
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S  # S = String
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH  # HASH = Partition Key
+      Tags:
+        - Key: Project
+          Value: CloudResume

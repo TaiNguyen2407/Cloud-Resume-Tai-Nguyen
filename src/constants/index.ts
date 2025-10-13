@@ -1,0 +1,1 @@
+export const apiGateWayUrl: string = 'https://cdvnk1g312.execute-api.eu-west-1.amazonaws.com/dev/view-visitor-count';
