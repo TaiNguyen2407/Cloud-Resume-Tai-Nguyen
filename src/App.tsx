@@ -1,27 +1,46 @@
-// App.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
-import { apiGateWayUrl } from './constants';
+import { apiGateWayWebSocketUrl } from './constants';
+import PresenceSnackbar from './components/PresenceSnackbar/PresenceSnackbar';
 
 const App = () => {
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [presenceMsg, setPresenceMsg] = useState("");
 
   useEffect(() => {
-    const fetchVisitorCount = async () => {
+    const fetchVisitorCountRealTime = () => {
       try {
-        const response = await fetch(apiGateWayUrl)
-        const data = await response.json();
-        setVisitorCount(data);
+        const socket = new WebSocket(apiGateWayWebSocketUrl)
+        socket.onopen = () => {console.log("connection opened!");}
+
+        socket.onmessage = (e) => {
+          try {
+            const res = JSON.parse(e.data);
+            if (res.type === "updatedCount") {
+              setVisitorCount(res.count);
+            }
+            if (res.type === "presence") {
+              setPresenceMsg(res.msg);
+            }
+          } catch (error) {
+            console.log("error with count: ", error)
+          }
+        }
+        socket.onclose = (e) => {
+          console.log("connection closed", e.code, e.reason);        
+        }
+
+        socket.onerror = (e) => {
+          console.log("connection error: ", e);
+        }
       } catch (error) {
-        console.error('Error fetching visitor count:', error);
-        setVisitorCount(0);
+        console.log("error is: ", error);        
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     };
-
-    fetchVisitorCount();
+    fetchVisitorCountRealTime();
   }, []);
 
   return (
@@ -34,8 +53,7 @@ const App = () => {
       <span>👁️ Visitors: {visitorCount?.toLocaleString()}</span>
     )}
   </div>
-
-  {/* Header */}
+  <PresenceSnackbar message={presenceMsg} />
   <header className="header">
     <h1 className="name">TAI NGUYEN</h1>
     <p className="title">Full-Stack Developer | AWS Solutions Architect - Associate</p>
