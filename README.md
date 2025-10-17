@@ -1,74 +1,54 @@
 # Cloud Resume — Tai Nguyen
 
-This is my implementation of the **Cloud Resume Challenge**, hosting a resume website on AWS and building a visitor counter using serverless infrastructure.
+This is my implementation of the **Cloud Resume Challenge**, hosting a resume website on AWS with **real-time visitor tracking** using serverless infrastructure.
 
-⚠️ **Work in progress** — the project is unfinished and will be enhanced over time.
+⚠️ **Work in progress** — the project is continually being enhanced.
 
 ---
 
 ## 📋 Project Overview
 
-This project is a portfolio / resume site served as a **static site on S3 + CloudFront**, with a backend API to count visitors. Its architecture follows the Cloud Resume Challenge pattern:
+This project is a portfolio / resume site served as a **static site on S3 + CloudFront**, with a **real-time backend** to track visitors and show presence notifications.  
 
-- The frontend is built in React / TypeScript.
-- The static artifacts are deployed to an S3 bucket configured for website hosting.
-- A CloudFront distribution sits in front to provide HTTPS, caching, and global delivery.
-- On each visitor’s page load, the React app calls an API Gateway endpoint.
-- The API Gateway triggers a Lambda function which reads/writes a visitor count stored in DynamoDB.
-- All infrastructure is managed via a CloudFormation template.
+The architecture now uses **WebSockets** for live updates:
 
-In short, the flow is:
+- The frontend is built in React / TypeScript.  
+- Static files are deployed to an S3 bucket configured for website hosting.  
+- CloudFront provides HTTPS, caching, and global distribution.  
+- On page load, the React app connects to a **WebSocket API Gateway**.  
+- A **DBUpdater Lambda** handles `$connect` and `$disconnect` events:
+  - `$connect` → increments total visitor count in DynamoDB and stores the connection ID.  
+  - `$disconnect` → removes the connection ID.  
+- A **DBStreamProcessor Lambda** is triggered by DynamoDB Streams on the visitor count table and broadcasts the updated visitor count to all active WebSocket connections.  
+- Presence notifications are sent to other active users whenever someone new connects.
+
+Simplified flow:
 
 ```
 User Browser
-   ↓ (HTTP / HTTPS request)
-CloudFront → S3 (serves static files)
-   ↓ (React JS executes in browser)
-React fetch → API Gateway
-   ↓
-Lambda function
-   ↓
-DynamoDB (visitor count)
-   ↑
-Lambda returns count → API Gateway → React → display
-```
-
-Here’s a simplified architecture diagram:
-
-```
-[User browser]
-     ↓
-[CloudFront] → [S3 Static Website]
-     ↓
-React app fetches → [API Gateway] → [Lambda] → [DynamoDB]
+↓ (WebSocket connection)
+WebSocket API Gateway
+↓
+DBUpdater Lambda
+↓
+VisitorCount DynamoDB (increment)
+ConnectionIDs DynamoDB (store connection ID)
+↓
+DBStreamProcessor Lambda (triggered by stream)
+↓
+WebSocket messages → all connected users
 ```
 
 ---
 
 ## 🛠️ Features & Components
 
-- **Static Website Hosting**: React app built and deployed to S3; CloudFront in front for distribution and cache.  
-- **Visitor Counter**: A serverless backend (Lambda + API Gateway + DynamoDB) increments and fetches visitor count.  
-- **Infrastructure as Code**: A CloudFormation template defines all AWS resources (S3 bucket, bucket policy, CloudFront distribution, DynamoDB table, etc.).  
-- **React Frontend**: The UI fetches and shows the visitor count.  
-- **CI/CD (future / in progress)**: Workflow to auto-deploy to S3 and invalidate CloudFront on merges to `main`.  
-
----
-
-## 📁 Repository Structure (partial)
-
-```
-.
-├── public/
-├── src/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml   # CI/CD workflow for frontend
-├── s3-cloud-resume-tai-nguyen.yaml   # CloudFormation template
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+- **Static Website Hosting**: React app built and deployed to S3; CloudFront in front.  
+- **Real-Time Visitor Counter**: Tracks total visitors and updates all users instantly using WebSockets.  
+- **Presence Notifications**: Displays messages like *“Someone else is viewing this with you”* when new users connect.  
+- **Infrastructure as Code**: CloudFormation template defines S3 buckets, WebSocket API, Lambda functions, and DynamoDB tables.  
+- **React Frontend**: Connects to WebSocket API, displays visitor count, and shows presence notifications.  
+- **CI/CD (planned)**: Workflow to auto-deploy frontend and invalidate CloudFront cache on merges to `main`.
 
 ---
 
