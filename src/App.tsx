@@ -5,11 +5,12 @@ import PresenceSnackbar from './components/PresenceSnackbar/PresenceSnackbar';
 
 const App = () => {
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [presenceMsg, setPresenceMsg] = useState("");
 
   useEffect(() => {
     const fetchVisitorCountRealTime = () => {
+      setLoading(true);
       try {
         const socket = new WebSocket(apiGateWayWebSocketUrl)
         socket.onopen = () => {console.log("connection opened!");}
@@ -84,8 +85,7 @@ const App = () => {
       Summary
     </h2>
     <p className="summary-text">
-     AWS-certified Full-Stack Developer with 2+ years building scalable HR platforms using <strong>Python, TypeScript/React, and cloud-native architectures</strong>.  Specialize in <strong>designing RESTful APIs</strong>, <strong>automating workflows</strong>, and <strong>optimizing developer experience</strong>. Proven track record of <strong>delivering features that save 250+ annual work hours</strong> and maintaining <strong>API systems serving multiple internal applications</strong>.  Passionate about <strong>clean code, system design and continuous learning</strong>, with a focus on creating software systems that are not only functional but also highly <strong>reliable, scalable, and maintainable</strong>.
-
+    AWS-certified Full-Stack Developer with 2+ years building scalable HR platforms using <strong>Python, TypeScript/React, and cloud-native architectures</strong>. Specialize in <strong>designing RESTful APIs</strong>, <strong>automating workflows</strong>, and <strong>optimizing developer experience</strong>. Proven track record of <strong>delivering features that save 250+ annual work hours</strong> and maintaining <strong>API systems serving multiple internal applications</strong>. Currently expanding expertise in <strong>CI/CD and infrastructure automation</strong> using <strong>Docker, Terraform, and Ansible</strong>. Passionate about <strong>clean code, system design, and continuous learning</strong>, with a focus on building software that is <strong>reliable, scalable, and maintainable</strong>.
     </p>
   </section>
 
@@ -105,7 +105,6 @@ const App = () => {
           <span className="skill-tag">Python</span>
           <span className="skill-tag">TypeScript</span>
           <span className="skill-tag">JavaScript</span>
-          <span className="skill-tag">SQL</span>
           <span className="skill-tag">HTML/CSS</span>
         </div>
       </div>
@@ -133,8 +132,7 @@ const App = () => {
           <span className="skill-tag">FastAPI</span>
           <span className="skill-tag">REST APIs</span>
           <span className="skill-tag">PostgreSQL</span>
-          <span className="skill-tag">SQLAlchemy</span>
-          <span className="skill-tag">API Gateway</span>
+          <span className="skill-tag">Nodejs</span>
         </div>
       </div>
 
@@ -150,6 +148,21 @@ const App = () => {
           <span className="skill-tag">API Gateway</span>
           <span className="skill-tag">CloudWatch</span>
           <span className="skill-tag">IAM</span>
+          <span className="skill-tag">API Gateway</span>
+        </div>
+      </div>
+
+      <div className="skill-category">
+        <h3 className="skill-category-title">
+          <span className="icon">🔄</span>
+          Tools & Methods
+        </h3>
+        <div className="skill-tags">
+          <span className="skill-tag">Git</span>
+          <span className="skill-tag">Docker</span>
+          <span className="skill-tag">Terraform</span>
+          <span className="skill-tag">Ansible</span>
+          <span className="skill-tag">Agile/Scrum</span>
         </div>
       </div>
 
@@ -163,21 +176,6 @@ const App = () => {
           <span className="skill-tag">GPT-4</span>
           <span className="skill-tag">LangChain</span>
           <span className="skill-tag">RAG Systems</span>
-          <span className="skill-tag">Document AI</span>
-        </div>
-      </div>
-
-      <div className="skill-category">
-        <h3 className="skill-category-title">
-          <span className="icon">🔄</span>
-          Tools & Methods
-        </h3>
-        <div className="skill-tags">
-          <span className="skill-tag">Git</span>
-          <span className="skill-tag">Docker</span>
-          <span className="skill-tag">CI/CD</span>
-          <span className="skill-tag">Agile/Scrum</span>
-          <span className="skill-tag">TDD</span>
         </div>
       </div>
     </div>
